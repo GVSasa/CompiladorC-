@@ -1,0 +1,695 @@
+// Scaner_A01568158.cpp 
+// Hecho por Sebastian Salazar Villanueva
+#include <iostream>
+#include <fstream>
+#include <string>
+using namespace std;
+
+// Variables Globales
+fstream fin("Sample.txt", fstream::in); // Modo lectura File in
+bool aceptchar; // Llave para saber si un carácter es letra, numero o carácter especial, de esta forma no pasar por los demás
+string identifier; // Buffer donde se guarda cada uno de los carácteres ya sean 
+int characterType; // Indica si es letra, numero o carácter especial
+
+// Arreglo de Characteres
+char characters = ' ';
+int letraArr[52] = { 'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z' };
+int num[10] = { '0','1','2','3','4','5','6','7','8','9' };
+int specialSymb[16] = { '/',';',',','=','*','+','-','(',')','<','>','[',']','{','}', '!' };
+int espacios[4] = { '\n','\t', ' ', '\0' };
+
+// Lista de Token
+string lista_token[27] = { "RETURN", "WHILE", "VOID", "ELSE", "IF", "INT", "INPUT" , "OUTPUT" , ">" , "<" , "=", "<=" , "==", ">=" , "!=", "(", ")" , "[" , "]" , "{" , "}" , "/" , "*", "-" , "+", "," , ";" };
+
+// Llave para saber que tipo de caracter es
+bool isLettter = false;
+bool isNum = false;
+bool isSpecial = false;
+bool isSpace = false;
+
+// Estados 
+bool aceptarEstados[36] = { false, false, false, false, false, false, false, false, false, false, true, true, true, true, true, true, true, true, true, true,true, true, true, true, true, true, true, true, true, true, true, true, false, false, false ,false };
+bool errorEstados[36] = { false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,true, true,true, true };
+bool avanEstados[10][20] = {
+                       { true, true, true, false, false, false, true, true, true, true, false, false, false, false, false, false, false, false, true, false},
+                       { true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,false},
+                       { false, true,false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,false},
+                       { false, false,false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,false},
+                       { true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true},
+                       { true, true, false, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true},
+                       { false, false,false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,false},
+                       { false, false,false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,false},
+                       { false, false,false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,false},
+                       { false, false,false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,false},
+};
+
+//Tabla de transiciones
+int tablaTrans[10][20] = {
+                       {1, 2 , 3, 14, 15, 16, 6, 7, 8, 9, 17, 18, 19, 20, 21, 22, 23, 24, 0, 34},
+                       {1, 32, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 34},
+                       {33, 2, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 34},
+                       {12, 12, 12, 4, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 34},
+                       {4, 4, 4, 5, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4},
+                       {4, 4, 13, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4},
+                       {25, 25, 25, 25, 25, 25, 25, 26, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 34},
+                       {27, 27, 27, 27, 27, 27, 27, 28, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 34},
+                       {29, 29, 29, 29, 29, 29, 29, 30, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 34},
+                       {35, 35, 35, 35, 35, 35, 35, 31, 35, 35, 35, 35, 35, 35, 35, 35, 35, 35, 35, 34}
+};
+
+
+namespace Vec {
+    template<typename Id>
+    class vector {
+    private:
+        // La capacidad inicial del arreglo con los 29 tokens
+        //size_t tipo de entero sin ser asignado
+        static const size_t capacidad_inicio = 1;
+        // La capacidad actual del arreglo
+        size_t capacidad_actual;
+        // El num_obj actual del arreglo
+        size_t num_obj;
+        //El array que contiene la data
+        Id* arr_datos;
+    public:
+        //Constructor
+        vector<Id>() : capacidad_actual(capacidad_inicio), arr_datos(new Id[capacidad_inicio]), num_obj(0) { }
+      
+        size_t getActualPos() {
+            return num_obj;
+        }
+
+        Id& get(int num) {
+            return arr_datos[num];
+        }
+
+        Id& getIdent(int x) {
+            return  arr_datos[x];
+        }
+
+        void reservar(size_t capacidad_nueva) {
+            if (capacidad_nueva > capacidad_actual) {
+                if (capacidad_nueva > 2 * capacidad_actual) {
+                    capacidad_actual = capacidad_nueva;
+
+                }
+                else {
+                    // Aumenta por 2 la capacidad
+                    capacidad_actual *= 2;
+                }
+                Id* nuevos_datos = new Id[capacidad_actual];
+
+                // Copiar la data en el arreglo
+                for (size_t i = 0; i < num_obj; i++) {
+                    nuevos_datos[i] = arr_datos[i];
+                }
+                // Reiniciar y liberar el arreglo
+                delete[] arr_datos;
+                // Asignar el nuevo arreglo con nuevos datos
+                arr_datos = nuevos_datos;
+            }
+        }
+
+        // Si el num_id es menos a capacidad_actual entonces inserta objeto al final
+        void push_back(const Id& valor) {
+            // Espacio para el nuevo objeto
+            if (num_obj == capacidad_actual) {
+                // Asignar un arreglo expandido
+                reservar(2 * capacidad_actual);
+            }
+            // Para insertar nuevo objeto
+            arr_datos[num_obj] = valor;
+            num_obj++;
+        }
+
+        void insertar(size_t index, const Id& valor) {
+            if (index > num_obj) {
+                cout << "ERROR: Fuera de rango";
+            }
+            // Asegurarnos que exista espacio para el nuevo obj
+            if (num_obj == capacidad_actual) {
+                reservar(2 * capacidad_actual);
+            }
+            // Recorre hasta encontrar el index
+            for (size_t i = num_obj; i > index; i--) {
+                arr_datos[i] = arr_datos[i - 1];
+            }
+            // Insertar nuevo objecto
+            arr_datos[index] = valor;
+            num_obj++;
+        }
+    };
+
+}
+// *Vectores*
+Vec::vector<string> vecOutput;
+Vec::vector<int> vecNum;
+Vec::vector<string> vecLetra;
+
+string upperCase(string ident) {
+    string upper = "";
+    for (int i = 0; i < ident.length(); i++) {
+        upper += toupper(ident[i]);
+    }
+
+    return upper;
+}
+
+int compararToken(int estado) {
+
+    string upper = upperCase(identifier);
+    switch (estado) {
+    case 10:
+        for (int d = 0; d <= 7;) {
+            if (upper == lista_token[d]) {
+                return d + 1;
+            }
+            d++;
+        }
+        return 28;
+        break;
+    case 11:
+        return 29;
+        break;
+    case 12:
+        return 22;
+        break;
+    case 13:
+        return 0;
+        break;
+    case 14:
+        return 23;
+        break;
+    case 15:
+        return 25;
+        break;
+    case 16:
+        return 24;
+        break;
+    case 17:
+        return 16;
+        break;
+    case 18:
+        return 17;
+        break;
+    case 19:
+        return 18;
+        break;
+    case 20:
+        return 19;
+        break;
+    case 21:
+        return 20;
+        break;
+    case 22:
+        return 21;
+        break;
+    case 23:
+        return 27;
+        break;
+    case 24:
+        return 26;
+        break;
+    case 25:
+        return 10;
+        break;
+    case 26:
+        return 12;
+        break;
+    case 27:
+        return 11;
+        break;
+    case 28:
+        return 13;
+        break;
+    case 29:
+        return 9;
+        break;
+    case 30:
+        return 14;
+        break;
+    case 31:
+        return 15;
+        break;
+    case 32:
+        cout << " ------ERROR, digito despues de letra----- ";
+        abort();
+        break;
+    case 33:
+        cout << " ------ERROR, letra despues de digito------ ";
+        abort();
+        break;
+    case 34:
+        cout << " ----ERROR, caracter no valido encontrado---- ";
+        abort();
+        break;
+    case 35:
+        cout << " -----ERROR, caracter despues de '!' -----";
+        abort();
+        break;
+
+    }
+}
+
+void siguienteChar() {
+    fin >> noskipws >> characters;
+}
+
+void indicarChar() {
+
+    if (isLettter == true) {
+        characterType = 0;
+    }
+    else if (isNum == true) {
+        characterType = 1;
+    }
+    else if (isSpecial == true) {
+
+        if (characters == '/') {
+            characterType = 2;
+        }
+
+        else if (characters == '*') {
+            characterType = 3;
+        }
+
+        else if (characters == '+') {
+            characterType = 4;
+        }
+
+        else if (characters == '-') {
+            characterType = 5;
+        }
+
+        else if (characters == '<') {
+            characterType = 6;
+        }
+
+        else if (characters == '=') {
+            characterType = 7;
+        }
+
+        else if (characters == '>') {
+            characterType = 8;
+        }
+
+        else if (characters == '!') {
+            characterType = 9;
+        }
+
+        else if (characters == '(') {
+            characterType = 10;
+        }
+
+        else if (characters == ')') {
+            characterType = 11;
+        }
+
+        else if (characters == '[') {
+            characterType = 12;
+        }
+
+        else if (characters == ']') {
+            characterType = 13;
+        }
+
+        else if (characters == '{') {
+            characterType = 14;
+        }
+
+        else if (characters == '}') {
+            characterType = 15;
+        }
+
+        else if (characters == ';') {
+            characterType = 16;
+        }
+
+        else if (characters == ',') {
+            characterType = 17;
+        }
+    }
+    else if (isSpace == true) {
+        characterType = 18;
+    }
+    else {
+        characterType = 19;
+    }
+
+}
+
+void checkLetra(char characters) {
+    for (int i = 0; i <= 51;) {
+        if (characters == letraArr[i]) {
+            isLettter = true;
+            aceptchar = true;
+            i = 51;
+        }
+        i++;
+    }
+}
+
+void checkNum(char characters) {
+    if (aceptchar == false) {
+        for (int x = 0; x <= 9;) {
+            if (characters == num[x]) {
+                aceptchar = true;
+                isNum = true;
+                x = 9;
+            }
+            x++;
+        }
+    }
+}
+
+void checkSpecial(char characters) {
+    if (aceptchar == false) {
+        for (int y = 0; y <= 15;) {
+            if (characters == specialSymb[y]) {
+                isSpecial = true;
+                aceptchar = true;
+                y = 17;
+            }
+            y++;
+        }
+    }
+}
+
+void checkEspacios(char characters) {
+    if (aceptchar == false) {
+        for (int y = 0; y <= 4;) {
+            if (characters == espacios[y]) {
+                isSpace = true;
+                aceptchar = true;
+                y = 3;
+            }
+            y++;
+        }
+    }
+}
+
+void checkCharacter(char characters) {
+    if (aceptchar == false) {
+        checkLetra(characters);
+    }
+    if (aceptchar == false) {
+        checkNum(characters);
+    }
+
+    if (aceptchar == false) {
+        checkSpecial(characters);
+    }
+
+    if (aceptchar == false) {
+        checkEspacios(characters);
+    }
+}
+
+int getCharType(char characters) {
+
+    if (characters == EOF) {
+        return 3;
+    }
+    else {
+        for (int i = 0; i <= 51;) {
+            if (characters == letraArr[i]) {
+                return 0;
+            }
+            i++;
+        }
+        for (int x = 0; x <= 9;) {
+            if (characters == num[x]) {
+                return 1;
+            }
+            x++;
+        }
+
+        for (int y = 0; y <= 15;) {
+            if (characters == specialSymb[y]) {
+                return 2;
+            }
+            y++;
+        }
+
+        for (int y = 0; y <= 5;) {
+            if (characters == espacios[y]) {
+                return 3;
+            }
+            y++;
+        }
+    }
+}
+
+// Checa el tipo con argumento del siguiente caracter 
+int peekCharType(char c) {
+    if (getCharType(c) == 0) {
+        return 0;
+    }
+    else if (getCharType(c) == 1) {
+        return 1;
+    }
+
+    else if (getCharType(c) == 2) {
+
+        if (c == '/') {
+            return 2;
+        }
+
+        else if (c == '*') {
+            return 3;
+        }
+
+        else if (c == '+') {
+            return 4;
+        }
+
+        else if (c == '-') {
+            return 5;
+        }
+
+        else if (c == '<') {
+            return 6;
+        }
+
+        else if (c == '=') {
+            return 7;
+        }
+
+        else if (c == '>') {
+            return 8;
+        }
+
+        else if (c == '!') {
+            return 9;
+        }
+
+        else if (c == '(') {
+            return 10;
+        }
+
+        else if (c == ')') {
+            return 11;
+        }
+
+        else if (c == '[') {
+            return 12;
+        }
+
+        else if (c == ']') {
+            return 13;
+        }
+
+        else if (c == '{') {
+            return 14;
+        }
+
+        else if (c == '}') {
+            return 15;
+        }
+
+        else if (c == ';') {
+            return 16;
+        }
+
+        else if (c == ',') {
+            return 17;
+        }
+    }
+    else if (getCharType(c) == 3) {
+        return 18;
+    }
+    else {
+        return 19;
+    }
+
+}
+
+void restartChar() {
+    isLettter = false;
+    isNum = false;
+    isSpecial = false;
+    isSpace = false;
+    aceptchar = false;
+}
+
+void mostrarToken(int estado) {
+    if (compararToken(estado) == 0) {
+        //Ignorar comentario
+    }
+    else if(compararToken(estado) > 1 && compararToken(estado) < 28) {
+        //cout << compararToken(estado);
+
+        vecOutput.insertar(vecOutput.getActualPos(), to_string(compararToken(estado)));
+       
+        //vecOutput.insertar();
+        //cout << vecOutput[0] << "\n";
+    }
+    else if (compararToken(estado) == 28) {
+        bool existe = false;
+        int x;
+        for (x = 0; x < vecLetra.getActualPos();) {
+            if (identifier == vecLetra.getIdent(x)) {
+                existe = true;
+                break;
+            }
+            x++;
+        }
+        if (existe) {
+            vecOutput.insertar(vecOutput.getActualPos(), to_string(compararToken(estado)) + ',' + to_string(x));
+        }
+        else {
+            //cout << vecNum.getActualPos() << endl;
+            int index = vecLetra.getActualPos();
+            vecLetra.insertar(vecNum.getActualPos(), identifier);
+            vecOutput.insertar(vecOutput.getActualPos(), to_string(compararToken(estado)) + ',' + to_string(index));
+        }
+    }
+    else if (compararToken(estado) == 29) {
+        bool existe = false;
+        int x;
+        for (x = 0; x < vecNum.getActualPos();) {
+            if (identifier == to_string(vecNum.getIdent(x))) {
+                existe = true;
+                break;
+            }
+            x++;
+        }
+        if (existe) {
+           vecOutput.insertar(vecOutput.getActualPos(), to_string(compararToken(estado)) +  ',' + to_string(x));
+        }
+        else {
+           //cout << vecNum.getActualPos() << endl;
+           int index = vecNum.getActualPos();
+           vecNum.insertar(vecNum.getActualPos(), stoi(identifier));
+           vecOutput.insertar(vecOutput.getActualPos(), to_string(compararToken(estado)) + ',' + to_string(index));
+        }
+    }
+}
+
+void estadoRecorrido() {
+    int estado = 0;
+    siguienteChar();
+
+    if ((characters == ' ' || characters == '\n' || characters == '\t')) {
+        return;
+    }
+    else {
+        identifier.push_back(characters);
+    }
+
+    while (!aceptarEstados[estado] && !errorEstados[estado]) {
+        // Empieza con nuevo estado
+        restartChar(); // Reinicia las vars booleanas del tipo de caracter
+        checkCharacter(characters);  //Checa si e caracter es letra,num,especial o espacio
+        indicarChar(); // Obtiene characterType (Index de tabla de transiciones)
+        int nuevoEstado = tablaTrans[estado][characterType];
+
+        if (avanEstados[estado][characterType]) {
+
+            // getCharType regresa : 0 letra, 1 num, 2 especial, 3 espacio
+            // Si es letra Y el caracter de enfrente no es un num Y el siguiente estado es aceptor
+            if (getCharType(characters) == 0 && !(getCharType(fin.peek()) != 1 && aceptarEstados[tablaTrans[nuevoEstado][peekCharType(fin.peek())]])) {
+                    siguienteChar();
+                    identifier.push_back(characters); 
+            }
+            // Si es un num Y el de enfrente no es letra Y el siguiente estado es aceptor
+            else if (getCharType(characters) == 1 && !(getCharType(fin.peek()) != 0 && aceptarEstados[tablaTrans[nuevoEstado][peekCharType(fin.peek())]])) {
+                siguienteChar();
+                identifier.push_back(characters);
+            }
+            // Si los estados son comentarios sigue empujandolos al buffer
+            else if (estado == 4 || estado == 5) {
+                siguienteChar();
+                identifier.push_back(characters);
+            }
+            // peekCharType especifica el caracter especial
+            // Si el caracter actual es Espacio en blanco o el caracter de enfrente es aceptor
+            else if ( aceptarEstados[tablaTrans[nuevoEstado][peekCharType(fin.peek())]]) {
+                if (characters == EOF) {
+                    return;
+                }
+                else {
+                    //identifier.push_back(characters);
+                    nuevoEstado = tablaTrans[nuevoEstado][peekCharType(fin.peek())];
+                }
+            }
+            // Para espacios en blanco
+            else if (getCharType(characters) == 3) {
+                identifier = "";
+                siguienteChar();
+                identifier.push_back(characters);
+            }
+
+            else {
+                if (fin.peek() == EOF) {
+                    mostrarToken(tablaTrans[nuevoEstado][peekCharType(fin.peek())]);
+                    return;
+                }
+                else {
+                    characters = fin.peek();
+                }
+            }
+
+        }
+        //cout << "ESTADO: " << nuevoEstado << "\n";
+        estado = nuevoEstado;
+    }
+
+
+    // Aqui recolecta e imprime el token
+    if (aceptarEstados[estado]) {
+
+        if ((characters == '<' && fin.peek() == '=') || (characters == '=' && fin.peek() == '=') || (characters == '>' && fin.peek() == '=') || (characters == '!' && fin.peek() == '=')) {
+            characters = fin.peek();
+            identifier.push_back(characters);
+            mostrarToken(estado);
+            identifier = "";
+            siguienteChar();
+        }
+        else {
+            mostrarToken(estado);
+            identifier = "";
+        }
+    }
+    else {
+        mostrarToken(estado);
+    }
+
+}
+
+void compareChar() {
+    //fin para declarar un objeto de archivo para abrirlo
+    //!eof mientras no se termine el archivo
+    while (fin.peek() != EOF) {
+        estadoRecorrido();
+    }
+}
+
+int main()
+{
+    compareChar();
+    for (int x = 0; x < vecOutput.getActualPos();) {
+        cout <<"<" + vecOutput.get(x) + ">"<< endl;
+        x++;
+    }
+}

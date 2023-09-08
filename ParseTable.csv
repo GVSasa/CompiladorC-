@@ -1,0 +1,29 @@
+NoTerminal,ID,void,int,NUM,if,while,return,input,output,else,-,+,/,*,{,},(,),[,],;,",",>,<,=,<=,>=,==',!=,$
+program,Error,2,1,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error
+program ',Error,4,3,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error
+declaration_list ',Error,6,5,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,7
+declaration ',Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,10,Error,9,Error,8,Error,Error,Error,Error,Error,Error,Error,Error,Error
+var_declaration ',Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,12,Error,11,Error,Error,Error,Error,Error,Error,Error,Error,Error
+params,Error,14,13,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error
+param_list ',Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,16,Error,Error,Error,15,Error,Error,Error,Error,Error,Error,Error,Error
+param,Error,Error,17,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error
+param ',Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,18,19,Error,Error,18,Error,Error,Error,Error,Error,Error,Error,Error
+local_declarations,21,Error,20,Error,21,21,21,21,21,Error,Error,Error,Error,Error,21,21,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error
+statement_list,22,Error,Error,Error,24,25,26,27,28,Error,Error,Error,Error,Error,23,29,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error
+statement ',Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,32,Error,30,Error,Error,Error,Error,Error,31,Error,Error,Error,Error,Error
+statement,33,Error,Error,Error,35,36,37,38,39,Error,Error,Error,Error,Error,34,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error
+var ',Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,40,Error,41,Error,Error,Error,Error,Error,Error,Error,Error,Error
+selection_stmt ',43,Error,Error,Error,43,43,43,43,43,"42, 43",Error,Error,Error,Error,43,43,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error
+return_stmt ',45,Error,Error,45,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,45,Error,Error,Error,44,Error,Error,Error,Error,Error,Error,Error,Error,Error
+expression,46,Error,Error,46,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,46,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error
+expression ',Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,53,Error,Error,53,Error,49,48,Error,47,50,51,52,Error
+arithmetic_expression,55,Error,Error,56,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,54,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error
+arithmetic_expression ',Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,58,57,Error,Error,Error,Error,Error,59,Error,59,59,59,59,59,Error,59,59,59,59,Error
+term,61,Error,Error,62,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,60,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error
+term ',Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,64,64,63,63,Error,Error,Error,64,Error,64,64,Error,64,64,Error,64,64,64,64,Error
+mulop,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,66,65,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error
+factor,68,Error,Error,69,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,67,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error
+factor ',Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,72,72,72,72,Error,Error,71,72,70,72,72,72,72,72,Error,72,72,72,72,Error
+call ',73,Error,Error,73,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,73,74,Error,Error,Error,73,Error,Error,Error,Error,Error,Error,Error,Error
+args,75,Error,Error,75,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,75,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error
+args_list ',Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,Error,77,Error,Error,Error,76,Error,Error,Error,Error,Error,Error,Error,Error
